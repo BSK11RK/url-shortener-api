@@ -21,3 +21,21 @@ def create_url(db: Session, original_url: str, short_code: str, user_id: int):
     db.commit()
     db.refresh(url)
     return url
+
+
+def get_user_urls(db: Session, user_id: int):
+    return db.query(models.URL).filter(models.URL.user_id == user_id).all()
+
+
+def delete_url(db: Session, url_id: int, user_id: int):
+    url = db.query(models.URL).filter(models.URL.id == url_id).first()
+    
+    if not url:
+        return None
+    
+    if url.user_id != user_id:
+        return None
+    
+    db.delete(url)
+    db.commit()
+    return url

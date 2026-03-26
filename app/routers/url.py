@@ -6,7 +6,7 @@ import random, string
 
 from app.db import SessionLocal
 from app.auth import get_current_user
-from app import crud, models
+from app import crud, models, schemas, auth
 
 
 router = APIRouter()
@@ -41,15 +41,12 @@ def create_short_url(
     
     
 # 自分のURL一覧
-@router.get("/urls")
+@router.get("/urls", response_model=list[schemas.URLResponse])
 def get_urls(
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(auth.get_current_user)
 ):
-    return db.query(crud.models.URL).filter(
-        crud.models.URL.user_id == current_user.id
-    ).all()
-    
+    return crud.get_user_urls(db, current_user.id)
     
 @router.get("/{short_code}")
 def redirect_url(short_code: str, db: Session = Depends(get_db)):
@@ -64,3 +61,16 @@ def redirect_url(short_code: str, db: Session = Depends(get_db)):
     url.click_count += 1
     db.commit()
     return RedirectResponse(url.original_url)
+
+
+@router.delete("/urls/{url_id}")
+def delete_url(
+    url_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(auth.get_current_user)
+):
+    deleted = crud.delete_url(db, url_id, current_user.id)
+    
+    if not deleted:
+        raise HTTPException(status_code=404, detail="URLが見つかりません")
+    return {"message": "削除しました"}
