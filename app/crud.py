@@ -23,8 +23,12 @@ def create_url(db: Session, original_url: str, short_code: str, user_id: int):
     return url
 
 
-def get_user_urls(db: Session, user_id: int):
-    return db.query(models.URL).filter(models.URL.user_id == user_id).all()
+def get_user_urls(db: Session, user_id: int, limit: int, offset: int):
+    return (
+        db.query(models.URL)
+        .filter(models.URL.user_id == user_id)
+        .offset(offset).limit(limit).all()
+    )
 
 
 def delete_url(db: Session, url_id: int, user_id: int):

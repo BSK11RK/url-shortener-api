@@ -1,5 +1,5 @@
 # メイン機能
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 import random, string
@@ -43,10 +43,12 @@ def create_short_url(
 # 自分のURL一覧
 @router.get("/urls", response_model=list[schemas.URLResponse])
 def get_urls(
+    limit: int = Query(10, le=100),
+    offset: int = 0,
     db: Session = Depends(get_db),
     current_user = Depends(auth.get_current_user)
 ):
-    return crud.get_user_urls(db, current_user.id)
+    return crud.get_user_urls(db, current_user.id, limit, offset)
     
 @router.get("/{short_code}")
 def redirect_url(short_code: str, db: Session = Depends(get_db)):
