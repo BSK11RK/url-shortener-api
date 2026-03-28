@@ -32,8 +32,11 @@ def login(
         models.User.email == form_data.username
     ).first()
     
-    if not db_user or db_user.password != form_data.password:
-        raise HTTPException(status_code=401, detail="ログイン失敗")
+    if not db_user:
+        raise HTTPException(status_code=400, detail="ユーザーが存在しません")
+    
+    if not auth.verify_password(form_data.password, db_user.password):
+        raise HTTPException(status_code=400, detail="パスワードが違います")
     
     token = auth.create_access_token({"sub": db_user.email})
     return {"access_token": token, "token_type": "bearer"}
