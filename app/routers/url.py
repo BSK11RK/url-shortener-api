@@ -9,7 +9,7 @@ from app.auth import get_current_user
 from app import crud, models, schemas, auth
 
 
-router = APIRouter()
+router = APIRouter(tags=["urls"])
 
 
 def get_db():

@@ -7,7 +7,7 @@ from app.db import SessionLocal
 from app import crud, schemas, auth, models
 
 
-router = APIRouter()
+router = APIRouter(tags=["auth"])
 
 
 def get_db():
